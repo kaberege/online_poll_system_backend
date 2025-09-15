@@ -32,7 +32,7 @@ class PollModelSerializer(serializers.ModelSerializer):
         return value
 
 class VoteModelSerializer(serializers.ModelSerializer):
-    poll = serializers.PrimaryKeyRelatedField(queryset=Poll.objects.all())
+    poll = serializers.PrimaryKeyRelatedField(read_only=True)
     voter = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Vote
