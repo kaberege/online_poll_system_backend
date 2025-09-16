@@ -14,6 +14,7 @@ class PollModelSerializer(serializers.ModelSerializer):
         input_formats=['%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S%z']
     )
     edited = serializers.BooleanField(read_only=True)
+    is_expired = serializers.SerializerMethodField()
 
     class Meta:
         model = Poll
@@ -30,6 +31,9 @@ class PollModelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Expiry time must be in the future.")
 
         return value
+    
+    def get_is_expired(self, obj):
+        return bool(obj.expires_at and obj.expires_at <= timezone.now())
 
 class VoteModelSerializer(serializers.ModelSerializer):
     poll = serializers.PrimaryKeyRelatedField(read_only=True)
