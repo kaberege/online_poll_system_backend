@@ -23,7 +23,7 @@ This project allows users to create polls, vote, and manage their accounts secur
 ### Clone the repository
 
 ```bash
-git clone https://github.com/kaberege/online_poll_system_backend.git
+git clone https://github.com/kaberege2/online_poll_system_backend.git
 cd online_poll_system_backend
 ```
 
@@ -78,7 +78,7 @@ python manage.py runserver
 
 After starting the server, visit:
 
-- Swagger UI: [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
+- Swagger UI: [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)
 - ReDoc: [http://localhost:8000/redoc/](http://localhost:8000/redoc/)
 
 ---
@@ -90,13 +90,13 @@ This project uses **JWT (JSON Web Tokens)**.
 - Obtain token:
 
   ```http
-  POST /api/token/
+  POST /api/auth/login/
   ```
 
 - Refresh token:
 
   ```http
-  POST /api/token/refresh/
+  POST /api/auth/token/refresh/
   ```
 
 - Use token in requests:

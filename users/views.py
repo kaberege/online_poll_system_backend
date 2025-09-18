@@ -6,6 +6,9 @@ from .serializers import RegisterUserSerializer, UpdateUserSerializer, LoginUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()  # Custom user model
 
@@ -27,11 +30,12 @@ class RegisterUserView(views.APIView):
         # Check if the data is valid according to the serializer's validation logic
         if serializer.is_valid():
             # Save the new user to the database if the data is valid
-            serializer.save()
-            
+            user = serializer.save()
+            logger.info(f"New user registered: {user.email}")
             # Return a success message with HTTP status 201 (Created)
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         # If the serializer data is invalid, return the validation errors with HTTP status 400 (Bad Request)
+        logger.warning(f"User registration failed: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Handle user login logic
@@ -51,6 +55,7 @@ class LoginUserView(views.APIView):
 
         # Check for data validation
         if not serializer.is_valid():
+            logger.warning("Login failed: invalid serializer data.")
             return Response({"error": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
     
         user_email = serializer.validated_data['email']
@@ -63,18 +68,22 @@ class LoginUserView(views.APIView):
                 "email": user.email,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "role": user.role,
             }
 
             if user.check_password(user_password):
                 # Create JWT token
                 refresh = RefreshToken.for_user(user)
                 access_token = refresh.access_token
+
+                logger.info(f"User {user_email} logged in successfully.")
                 # Return the tokens
                 return Response({'user_data':user_data,'access': str(access_token),'refresh': str(refresh)})
+
+            logger.warning(f"Failed login attempt for {user_email}: wrong password.")
             return Response({"error": "Invalid password!"}, status=status.HTTP_400_BAD_REQUEST)
 
         except User.DoesNotExist:
+            logger.error(f"Failed login attempt: email {user_email} not found.")
             return Response({"error": "Invalid email!"}, status=status.HTTP_400_BAD_REQUEST)
 
 # Handle user update logic
@@ -96,7 +105,9 @@ class UpdateUserView(views.APIView):
 
         if serializer.is_valid():
             serializer.save()   # Update the user
+            logger.info(f"User {request.user.email} updated their profile.")
             return Response(serializer.data, status=status.HTTP_200_OK)
+        logger.warning(f"Profile update failed for {request.user.email}: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # This view uses the refresh token to blacklist it on logout
@@ -115,13 +126,16 @@ class LogoutUserView(views.APIView):
     def post(self, request):
         serializer = LogoutUserSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.warning(f"Logout failed for {request.user.email}: invalid serializer data.")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
             refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)
             token.blacklist()
+            logger.info(f"User {request.user.email} logged out successfully.")
             return Response({"message": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as error:
+            logger.error(f"Logout error for {request.user.email}: {str(error)}")
             return Response({"error": "Invalid token or already blacklisted"}, status=status.HTTP_400_BAD_REQUEST)
         
 # Handle user delete logic
@@ -137,6 +151,7 @@ class DeleteUserView(views.APIView):
         }
     )
     def delete(self, request):
-        instance = request.user
-        instance.delete()  # Delete the user
+        email = request.user.email
+        request.user.delete() # Delete the user
+        logger.critical(f"User {email} deleted their account.")
         return Response({"message": "User has been deleted successfully."}, status=status.HTTP_204_NO_CONTENT)

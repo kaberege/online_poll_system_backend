@@ -2,7 +2,9 @@ from rest_framework import serializers
 from .models import Poll, Vote
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+import logging
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class PollModelSerializer(serializers.ModelSerializer):
@@ -28,6 +30,7 @@ class PollModelSerializer(serializers.ModelSerializer):
             value = timezone.make_aware(value)
 
         if value and value <= timezone.now():
+            logger.warning("Poll expiry validation failed: expiry in the past.")
             raise serializers.ValidationError("Expiry time must be in the future.")
 
         return value
@@ -41,3 +44,11 @@ class VoteModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = "__all__"
+
+    def validate_option(self, value):
+        poll = self.context.get("poll")
+        if poll and value.lower() not in [item.lower() for item in poll.options]:
+            logger.warning(f"Invalid vote option '{value}' for poll {poll.poll_id}")
+            raise serializers.ValidationError("Invalid option for this poll.")
+        return value
+

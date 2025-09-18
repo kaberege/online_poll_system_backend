@@ -30,12 +30,12 @@ class Poll(models.Model):
         ]
         ordering = ["-created_at"]
 
-    def __str__(self):
-        return self.title
-
     @property
     def is_expired(self):
         return bool(self.expires_at and self.expires_at <= timezone.now())
+    
+    def __str__(self):
+        return self.title
 
 class Vote(models.Model):
     vote_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -53,6 +53,5 @@ class Vote(models.Model):
             Index(fields=['poll','created_at']),
         ]
 
-    def clean(self):
-        if self.option not in self.poll.options:
-            raise ValidationError("Invalid option for this poll.")
+    def __str__(self):
+        return f'Voted on - {self.option}'

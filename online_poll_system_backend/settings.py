@@ -27,7 +27,7 @@ environ.Env.read_env(os.path.join(BASE_DIR / ".env"))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY", default="unsafe-secret-key")
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -182,4 +182,45 @@ SWAGGER_SETTINGS = {
       }
    },
    'USE_SESSION_AUTH': False
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": env("DJANGO_LOG_LEVEL"),
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "level": env("DJANGO_LOG_LEVEL"),
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / env("DJANGO_LOG_FILE"),
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "delay": True,
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "users": {
+            "handlers": ["console", "file"],
+            "level": env("DJANGO_LOG_LEVEL"),
+        },
+        "polls": {
+            "handlers": ["console", "file"],
+            "level": env("DJANGO_LOG_LEVEL"),
+        },
+    },
 }
