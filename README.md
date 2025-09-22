@@ -23,7 +23,7 @@ This project allows users to create polls, vote, and manage their accounts secur
 ### Clone the repository
 
 ```bash
-git clone https://github.com/kaberege2/online_poll_system_backend.git
+git clone https://github.com/kaberege/online_poll_system_backend.git
 cd online_poll_system_backend
 ```
 
