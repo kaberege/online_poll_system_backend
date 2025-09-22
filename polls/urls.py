@@ -7,5 +7,5 @@ router.register(r'polls', PollModelViewSet, basename="list-polls")
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('votes/<uuid:poll_id>/', VoteModelViewSet.as_view(), name='list-votes'),
+    path('polls/<uuid:poll_id>/votes/', VoteModelViewSet.as_view(), name='list-votes'),
 ]
