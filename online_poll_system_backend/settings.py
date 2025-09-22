@@ -35,7 +35,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ['online-poll-system-backend.onrender.com']
+ALLOWED_HOSTS = ['kgn-online-poll-system-backend.onrender.com']
 
 
 # Application definition
