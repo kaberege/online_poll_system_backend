@@ -1,13 +1,55 @@
-FROM python:3.13.2
+# ---Stage 1: Builder---
+
+# Pull official base image
+FROM python:3.15.0a3-slim-trixie AS builder
+
+# Set work directory
 WORKDIR /app
+
 # Set environment variables 
 # Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
 #Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1 
+
+# Upgrade pip and install dependencies
 RUN pip install --upgrade pip
+
+# Copy the requirements file first
 COPY ./requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
+
+# Install Python dependecies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ---Stage 2: Production---
+
+# Pull official base image
+FROM python:3.15.0a3-slim-trixie
+
+# Create the app user
+RUN useradd -m -r appuser && \
+    mkdir /app && \
+    chown -R appuser /app
+
+# Copy the Python dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.15/site-packages/ /usr/local/lib/python3.15/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Set the working directory
+WORKDIR /app
+
+# Coppy application code
+COPY --chown=appuser:appuser . .
+
+# Set environment variables to optimize Python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Switch to non-root user
+USER appuser
+
+# Expose the application port
 EXPOSE 8000
+
+# Start the application
 CMD [ "./entrypoint.sh"]
