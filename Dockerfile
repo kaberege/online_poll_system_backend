@@ -1,4 +1,4 @@
-# ---Stage 1: Builder---
+# ---Stage 1: Build Environment(Builder)---
 
 # Pull official base image
 FROM python:3.15.0a3-slim-trixie AS builder
@@ -9,7 +9,7 @@ WORKDIR /app
 # Set environment variables 
 # Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
-#Prevents Python from buffering stdout and stderr
+# Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1 
 
 # Upgrade pip and install dependencies
@@ -21,7 +21,7 @@ COPY ./requirements.txt .
 # Install Python dependecies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ---Stage 2: Production---
+# ---Stage 2: Runtime environment(Production)---
 
 # Pull official base image
 FROM python:3.15.0a3-slim-trixie
@@ -38,7 +38,7 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 # Set the working directory
 WORKDIR /app
 
-# Coppy application code
+# Copy application code
 COPY --chown=appuser:appuser . .
 
 # Set environment variables to optimize Python
