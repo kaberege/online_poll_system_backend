@@ -1,15 +1,15 @@
 # ---Stage 1: Build Environment(Builder)---
 
 # Pull official base image
-FROM python:3.15.0a3-slim-trixie AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 # Set work directory
 WORKDIR /app
 
 # Set environment variables 
-# Prevents Python from writing pyc files to disk
+# Prevent Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
-# Prevents Python from buffering stdout and stderr
+# Prevent Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1 
 
 # Upgrade pip and install dependencies
@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ---Stage 2: Runtime environment(Production)---
 
 # Pull official base image
-FROM python:3.15.0a3-slim-trixie
+FROM python:3.12-slim-bookworm
 
 # Create the app user
 RUN useradd -m -r appuser && \
@@ -32,7 +32,7 @@ RUN useradd -m -r appuser && \
     chown -R appuser /app
 
 # Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.15/site-packages/ /usr/local/lib/python3.15/site-packages/
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Set the working directory
