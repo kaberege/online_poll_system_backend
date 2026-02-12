@@ -1,116 +1,97 @@
 # Online Poll System Backend
 
-A Django REST Framework–based backend for managing polls, votes, and users with JWT authentication.  
-This project allows users to create polls, vote, and manage their accounts securely.
+A robust **Django REST Framework (DRF)** backend for managing real-time polls, secure voting, and user accounts. This system is architected for scalability with PostgreSQL, secured with JWT, and fully containerized with Docker.
+
+## Key Features
+
+- **Secure Auth**: JWT-based authentication.
+- **Poll Management**: Full CRUD capabilities for polls and choices.
+- **Smart Voting**:
+  - Strict "one user, one vote" enforcement.
+  - Automatic prevention of voting on expired polls.
+
+- **Documentation**: Interactive API docs via Swagger and ReDoc.
+- **Production Ready**: Optimized with Multi-stage Docker builds, WhiteNoise for static files, and Gunicorn support.
 
 ---
 
-## Features
+## Tech Stack
 
-- User authentication and authorization with **JWT** (`rest_framework_simplejwt`)
-- Create, update, delete, and list **polls**
-- Vote on polls (restricted to one vote per user per poll)
-- Prevent voting on **expired polls**
-- Swagger UI (`drf_yasg`) for API documentation
-- PostgreSQL database support
-- CORS enabled for frontend integration
-- Static & media file handling with WhiteNoise
+| Component     | Technology                         |
+| ------------- | ---------------------------------- |
+| **Framework** | Django 5.2 & Django REST Framework |
+| **Database**  | PostgreSQL                         |
+| **Auth**      | SimpleJWT                          |
+| **Docs**      | drf-yasg (Swagger/OpenAPI)         |
+| **Container** | Docker & Docker Compose            |
 
 ---
 
-## Installation & Setup
+## Getting Started
 
-### Clone the repository
+### Prerequisites
+
+- Docker & Docker Compose **OR** Python 3.12+ and PostgreSQL.
+
+### Quick Start (Docker)
+
+The easiest way to get the system running is using Docker:
+
+1. **Clone & Enter**:
 
 ```bash
 git clone https://github.com/kaberege/online_poll_system_backend.git
 cd online_poll_system_backend
+
 ```
 
-### Create a virtual environment
+2. **Environment Setup**: Create a `.env` file from the provided `.env.dist`.
+3. **Spin Up**:
+
+```bash
+docker compose up --build
+
+```
+
+_The server will be available at `http://localhost:8000`._
+
+### Manual Installation
+
+1. **Create a virtual environment**:
 
 ```bash
 python -m venv venv
 source venv/bin/activate   # On Linux/Mac
 venv\Scripts\activate      # On Windows
+
 ```
 
-### Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Configure environment variables
-
-Copy `.env.dist` → `.env` and update values:
-
-```env
-SECRET_KEY=your_secret_key
-DATABASE_NAME=pollDB
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-```
-
-### Apply migrations
+2. **Install dependencies**: `pip install -r requirements.txt`.
+3. **Configure environment variables**: Copy `.env.dist` → `.env` and update values:
+4. **Database**: Ensure PostgreSQL is running and credentials match your `.env`.
+5. **Init**:
 
 ```bash
 python manage.py migrate
-```
-
-### Create a superuser
-
-```bash
 python manage.py createsuperuser
-```
-
-### Run the server
-
-```bash
 python manage.py runserver
+
 ```
 
 ---
 
 ## API Documentation
 
-After starting the server, visit:
+Once the server is running, explore the API interactively:
 
 - Swagger UI: [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)
 - ReDoc: [http://localhost:8000/redoc/](http://localhost:8000/redoc/)
 
----
+### Core Endpoints
 
-## Authentication
-
-This project uses **JWT (JSON Web Tokens)**.
-
-- Obtain token:
-
-  ```http
-  POST /api/auth/login/
-  ```
-
-- Refresh token:
-
-  ```http
-  POST /api/auth/token/refresh/
-  ```
-
-- Use token in requests:
-
-  ```
-  Authorization: Bearer <your_token>
-  ```
-
----
-
-## Tech Stack
-
-- **Backend**: Django 5.2, Django REST Framework
-- **Database**: PostgreSQL
-- **Authentication**: JWT (`djangorestframework-simplejwt`)
-- **Documentation**: drf-yasg (Swagger & ReDoc)
-- **Other Tools**: django-cors-headers, django-filter, whitenoise
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| `POST` | `/api/auth/login/`      | Obtain JWT Access/Refresh tokens |
+| `GET`  | `/api/polls/`           | List all active polls            |
+| `POST` | `/api/polls/{id}/vote/` | Submit a vote (Auth required)    |
+| `GET`  | `/api/polls/{id}/`      | Get detailed poll results        |
